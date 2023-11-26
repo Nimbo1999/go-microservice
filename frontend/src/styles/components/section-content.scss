@@ -1,0 +1,12 @@
+.section-content {
+  flex: 1;
+
+  &__title {
+
+  }
+
+  &__container {
+    border: 1px solid theme($palette, "text", "main");
+    padding: 1.5rem;
+  }
+}

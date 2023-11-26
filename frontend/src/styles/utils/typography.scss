@@ -1,0 +1,9 @@
+p, a, button, div, li, small {
+  font-size: 1rem;
+  letter-spacing: .2px;
+  color: theme($palette, "text", "main");
+}
+
+small {
+  font-size: 0.75rem;
+}

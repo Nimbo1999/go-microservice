@@ -1,0 +1,13 @@
+@use "sass:map";
+
+$font-weights: ("light": 300, "regular": 400, "medium": 500, "bold": 700);
+
+$text: ("main": #ebebeb, "hint": #acacac);
+
+$palette: (
+  "text": $text,
+);
+
+$screen-sm: 640px;
+$screen-md: 960px;
+$screen-lg: 1280px;

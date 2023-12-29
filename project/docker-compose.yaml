@@ -10,3 +10,10 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../frontend/Dockerfile
+    restart: always
+    ports:
+      - "80:80"

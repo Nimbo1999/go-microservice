@@ -4,9 +4,62 @@ services:
     build:
       context: ../broker-service
       dockerfile: ../broker-service/broker-service.dockerfile
-    restart: always
+      args:
+        - ALLOWED_ORIGIN=http://frontend*
+    restart: "always"
     ports:
-      - "8080:80"
+      - "8080:8080"
     deploy:
       mode: replicated
       replicas: 1
+    environment:
+      - ALLOWED_ORIGIN=http://frontend*
+
+  authentication-service:
+    build:
+      context: ../authentication-service
+      dockerfile: ../authentication-service/authentication-service.dockerfile
+      args:
+        - ALLOWED_ORIGIN=http://frontend*
+    restart: always
+    ports:
+      - "8081:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      - DSN=postgresql://postgres:password@postgres/users?sslmode=disable&timezone=UTC&connect_timeout=5
+      - PORT=80
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../frontend/Dockerfile
+      args:
+        - VITE_HOST=http://localhost:8080/
+    restart: "always"
+    environment:
+      - NGINX_PORT=80
+    ports:
+      - "80:80"
+    depends_on:
+      - broker-service
+    links:
+      - "broker-service"
+
+  postgres:
+    image: 'postgres:14.2'
+    ports:
+      - "5432:5432"
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users
+    volumes:
+      - ./db-data/postgres/:/var/lib/postgresql/data/

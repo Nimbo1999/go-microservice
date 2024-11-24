@@ -1,4 +1,7 @@
-FROM golang:1.21.4-alpine as builder
+FROM golang:1.23.2-alpine as builder
+
+ARG ALLOWED_ORIGIN
+ENV ALLOWED_ORIGIN=$ALLOWED_ORIGIN
 
 WORKDIR /app
 

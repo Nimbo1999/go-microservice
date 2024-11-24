@@ -15,7 +15,7 @@ function App() {
         <button onClick={async () => {
           setPayloads((prev) => [...prev, null])
           try {
-            const request = await fetch('http://localhost:8080', { method: 'POST' });
+            const request = await fetch(import.meta.env.VITE_HOST, { method: 'POST' });
             const response = await request.json()
             setResponses((prev) => [...prev, response])
           } catch(err) {

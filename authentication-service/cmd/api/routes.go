@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -11,12 +10,10 @@ import (
 )
 
 func (app *Config) routes() http.Handler {
-	mux := chi.NewRouter()
-	ALLOWED_ORIGIN := os.Getenv("ALLOWED_ORIGIN")
-	log.Printf("ALLOWED_ORIGIN: %s\n", ALLOWED_ORIGIN)
-	// Specfi which origins can have cors acces
+	mux := chi.NewMux()
+	host := os.Getenv("ALLOWED_ORIGIN")
 	mux.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "http://127.0.0.1:5173", ALLOWED_ORIGIN},
+		AllowedOrigins:   []string{"http://localhost:5173", "http://127.0.0.1:5173", host},
 		AllowedMethods:   []string{http.MethodDelete, http.MethodPut, http.MethodPost, http.MethodGet, http.MethodOptions},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CRSF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -25,6 +22,5 @@ func (app *Config) routes() http.Handler {
 	}))
 	mux.Use(middleware.Heartbeat("/ping"))
 	mux.Use(middleware.Logger)
-	mux.Post("/", app.Broker)
 	return mux
 }

@@ -37,3 +37,7 @@ start: build_front
 	@echo "Starting frontend"
 	cd ../frontend/dist && serve .
 	@echo ""
+
+# Migrate databases wit
+# goose postgres "postgresql://postgres:password@localhost/users?sslmode=disable&connect_timeout=5" up
+# GOOSE_DRIVER=postgres GOOSE_DBSTRING="postgresql://postgres:password@localhost/users?sslmode=disable&connect_timeout=5" goose up

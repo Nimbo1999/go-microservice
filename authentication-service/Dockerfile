@@ -1,17 +1,20 @@
-FROM golang:1.21.4-alpine as builder
+FROM golang:1.23.2-alpine as builder
+
+ARG ALLOWED_ORIGIN
+ENV ALLOWED_ORIGIN=$ALLOWED_ORIGIN
 
 WORKDIR /app
 
-COPY . /app/
+COPY . .
 
-RUN CGO_ENABLED=0 go build -o authApp ./cmd/api
+RUN CGO_ENABLED=0 go build -o authenticationApp ./cmd/api
 
-RUN chmod +x ./authApp
+RUN chmod +x ./authenticationApp
 
 FROM scratch
 
 WORKDIR /app
 
-COPY --from=builder /app/authApp .
+COPY --from=builder /app/authenticationApp .
 
-CMD [ "/app/authApp" ]
+CMD [ "/app/authenticationApp" ]

@@ -1,0 +1,9 @@
+###
+# Authenticate User
+POST http://localhost:8081/authenticate HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "verysecret"
+}

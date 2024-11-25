@@ -30,14 +30,16 @@ services:
       dockerfile: ../broker-service/Dockerfile
       args:
         - ALLOWED_ORIGIN=http://frontend*
+        - AUTHENTICATION_SERVICE_BASE_URL=http://authentication-service
     restart: "always"
     ports:
-      - "8080:8080"
+      - "8080:80"
     deploy:
       mode: replicated
       replicas: 1
     environment:
       - ALLOWED_ORIGIN=http://frontend*
+      - AUTHENTICATION_SERVICE_BASE_URL=http://authentication-service
 
   authentication-service:
     build:
@@ -62,7 +64,7 @@ services:
       context: ../frontend
       dockerfile: ../frontend/Dockerfile
       args:
-        - VITE_HOST=http://localhost:8080/
+        - VITE_BROKER_HOST=http://localhost:8080
     restart: "always"
     environment:
       - NGINX_PORT=80

@@ -15,23 +15,50 @@ function App() {
         <button onClick={async () => {
           setPayloads((prev) => [...prev, null])
           try {
-            const request = await fetch(import.meta.env.VITE_HOST, { method: 'POST' });
+            const request = await fetch(import.meta.env.VITE_BROKER_HOST, { method: 'POST' });
             const response = await request.json()
             setResponses((prev) => [...prev, response])
           } catch(err) {
             console.error(err)
           }
         }}>
-          Test
+          Test Broker
+        </button>
+
+        <button onClick={async () => {
+          const payload = {
+            action: 'auth',
+            auth: {
+              email: 'admin@example.com',
+              password: 'verysecret'
+            }
+          }
+
+          setPayloads((prev) => [...prev, payload])
+          try {
+            const request = await fetch(`${import.meta.env.VITE_BROKER_HOST}/handle`, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const response = await request.json()
+            setResponses((prev) => [...prev, response])
+          } catch(err) {
+            console.error(err)
+          }
+        }}>
+          Test Auth
         </button>
       </header>
 
       <section className="container__content">
         <SectionContent title="Sent">
           <div className="container__content-wrapper">
-              {payloads.length < 1 ? "Nothing sent yet..." : payloads.map(payload => (
-              <pre className="container__content-item">{format(payload)}</pre>
-              ))}
+            {payloads.length < 1 ? "Nothing sent yet..." : payloads.map(payload => (
+            <pre className="container__content-item">{format(payload)}</pre>
+            ))}
           </div>
         </SectionContent>
 

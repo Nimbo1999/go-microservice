@@ -16,7 +16,7 @@ func (app *Config) routes() http.Handler {
 	log.Printf("ALLOWED_ORIGIN: %s\n", ALLOWED_ORIGIN)
 	// Specfi which origins can have cors acces
 	mux.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173", "http://127.0.0.1:5173", ALLOWED_ORIGIN},
+		AllowedOrigins:   []string{"http://localhost:5173", "http://127.0.0.1:5173", "http://localhost", "http://127.0.0.1", ALLOWED_ORIGIN},
 		AllowedMethods:   []string{http.MethodDelete, http.MethodPut, http.MethodPost, http.MethodGet, http.MethodOptions},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CRSF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -26,5 +26,6 @@ func (app *Config) routes() http.Handler {
 	mux.Use(middleware.Heartbeat("/ping"))
 	mux.Use(middleware.Logger)
 	mux.Post("/", app.Broker)
+	mux.Post("/handle", app.HandleSubmission)
 	return mux
 }

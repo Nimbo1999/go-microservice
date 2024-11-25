@@ -1,18 +1,22 @@
 package main
 
 import (
+	"broker/config"
 	"fmt"
 	"log"
 	"net/http"
 )
 
-const webPort = "8080"
+const webPort = "80"
 
 type Config struct {
+	env *config.EnvVariables
 }
 
 func main() {
-	app := Config{}
+	app := Config{
+		env: config.NewEnvVariables(),
+	}
 	srv := http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
 		Handler: app.routes(),

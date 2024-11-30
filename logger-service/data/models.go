@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -65,4 +66,40 @@ func (l *LogEntry) All(ctx context.Context) ([]LogEntry, error) {
 		logs = append(logs, item)
 	}
 	return logs, nil
+}
+
+func (l *LogEntry) GetOne(ctx context.Context, id string) (*LogEntry, error) {
+	collection := client.Database("logs").Collection("logs")
+	docId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	var entry LogEntry
+	if err := collection.FindOne(ctx, bson.M{"_id": docId}).Decode(&entry); err != nil {
+		return nil, err
+	}
+	return &entry, nil
+}
+
+func (l *LogEntry) DropCollection(ctx context.Context) error {
+	collection := client.Database("logs").Collection("logs")
+	if err := collection.Drop(ctx); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (l *LogEntry) Update(ctx context.Context) (*mongo.UpdateResult, error) {
+	collection := client.Database("logs").Collection("logs")
+	docId, err := primitive.ObjectIDFromHex(l.ID)
+	if err != nil {
+		return nil, err
+	}
+	return collection.UpdateOne(ctx, bson.M{"_id": docId}, bson.D{
+		bson.E{"$set", bson.D{
+			bson.E{"name", l.Name},
+			bson.E{"data", l.Data},
+			bson.E{"updated_at", time.Now()},
+		}},
+	})
 }

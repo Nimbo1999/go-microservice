@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"log-service/data"
+	"net/http"
 	"os"
 	"time"
 
@@ -11,21 +14,24 @@ import (
 )
 
 var (
-	webPort  string
-	rpcPort  string
-	mongoUrl string
-	grpcPort string
-	client   *mongo.Client
+	webPort        string
+	rpcPort        string
+	mongoUrl       string
+	grpcPort       string
+	allowedOrigins string
+	client         *mongo.Client
 )
 
 type Config struct {
+	Models data.Models
 }
 
 func init() {
-	webPort = os.Getenv("APP_WEB_PORT")
-	rpcPort = os.Getenv("APP_RPC_PORT")
-	mongoUrl = os.Getenv("APP_MONGO_URL")
-	grpcPort = os.Getenv("APP_GRPC_PORT")
+	webPort = os.Getenv("WEB_PORT")
+	rpcPort = os.Getenv("RPC_PORT")
+	mongoUrl = os.Getenv("MONGO_URL")
+	grpcPort = os.Getenv("GRPC_PORT")
+	allowedOrigins = os.Getenv("ALLOWED_ORIGIN")
 }
 
 func main() {
@@ -43,6 +49,21 @@ func main() {
 			log.Fatal(err)
 		}
 	}()
+
+	app := Config{
+		Models: data.New(mongoClient),
+	}
+	if err := app.Server(); err != nil {
+		log.Panicln(err)
+	}
+}
+
+func (app *Config) Server() error {
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%s", webPort),
+		Handler: app.routes(allowedOrigins),
+	}
+	return srv.ListenAndServe()
 }
 
 func connectToMongo(ctx context.Context) (*mongo.Client, error) {

@@ -11,6 +11,14 @@ import (
 type RequestPayload struct {
 	Action string      `json:"action"`
 	Auth   AuthPayload `json:"auth,omitempty"`
+	Mail   MailPayload `json:"mail,omitempty"`
+}
+
+type MailPayload struct {
+	From    string `json:"from"`
+	To      string `json:"to"`
+	Subject string `json:"subject"`
+	Message string `json:"message"`
 }
 
 type AuthPayload struct {
@@ -38,6 +46,8 @@ func (app *Config) HandleSubmission(response http.ResponseWriter, request *http.
 	switch payload.Action {
 	case "auth":
 		app.authenticate(response, payload.Auth)
+	case "mail":
+		app.sendMail(response, payload.Mail)
 	default:
 		app.errorJSON(response, errors.New("unknown action"), http.StatusBadRequest)
 	}
@@ -82,5 +92,30 @@ func (app *Config) authenticate(w http.ResponseWriter, p AuthPayload) {
 	payload.Error = false
 	payload.Message = "Authenticated"
 	payload.Data = dataFromService.Data
+	app.writeJSON(w, http.StatusAccepted, payload)
+}
+
+func (app *Config) sendMail(w http.ResponseWriter, p MailPayload) {
+	jsonData, _ := json.MarshalIndent(p, "", "\t")
+	request, err := http.NewRequest("POST", fmt.Sprintf("%s/send", app.env.MailServiceUrl), bytes.NewBuffer(jsonData))
+	if err != nil {
+		app.errorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+	request.Header.Set("Content-Type", "application/json")
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		app.errorJSON(w, err, http.StatusBadRequest)
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode > 300 {
+		app.errorJSON(w, errors.New("unabled to communicate with the mail service"), response.StatusCode)
+		return
+	}
+	var payload jsonResponse
+	payload.Error = false
+	payload.Message = fmt.Sprintf("Message sent to %s", p.To)
 	app.writeJSON(w, http.StatusAccepted, payload)
 }

@@ -39,9 +39,6 @@ services:
     build:
       context: ../broker-service
       dockerfile: ../broker-service/Dockerfile
-      args:
-        - ALLOWED_ORIGIN=http://frontend*
-        - AUTHENTICATION_SERVICE_BASE_URL=http://authentication-service
     restart: "always"
     ports:
       - 8080:80
@@ -51,13 +48,12 @@ services:
     environment:
       - ALLOWED_ORIGIN=http://frontend*
       - AUTHENTICATION_SERVICE_BASE_URL=http://authentication-service
+      - MAIL_SERVICE_BASE_URL=http://mailer-service
 
   authentication-service:
     build:
       context: ../authentication-service
       dockerfile: ../authentication-service/Dockerfile
-      args:
-        - ALLOWED_ORIGIN=http://frontend*
     restart: always
     ports:
       - 8081:80
@@ -67,6 +63,7 @@ services:
     environment:
       - DSN=postgresql://postgres:password@postgres/users?sslmode=disable&timezone=UTC&connect_timeout=5
       - PORT=80
+      - ALLOWED_ORIGIN=http://frontend*
     depends_on:
       - postgres
 
@@ -74,8 +71,6 @@ services:
     build:
       context: ../logger-service
       dockerfile: ../logger-service/Dockerfile
-      args:
-        - ALLOWED_ORIGIN=http://frontend*
     restart: always
     ports:
       - 8082:80
@@ -87,6 +82,7 @@ services:
       - RPC_PORT=5001
       - MONGO_URL=mongodb://mongo:27017
       - GRPC_PORT=50001
+      - ALLOWED_ORIGIN=http://frontend*
     depends_on:
       - mongo
 
@@ -105,3 +101,32 @@ services:
       - broker-service
     links:
       - "broker-service"
+
+  mailer-service:
+    build:
+      context: ../mail-service
+      dockerfile: ../mail-service/Dockerfile
+    restart: always
+    ports:
+      - 8083:80
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      - ALLOWED_ORIGIN=http://frontend*
+      - PORT=80
+      - MAIL_DOMAIN=localhost
+      - MAIL_HOST=mailhog
+      - MAIL_USERNAME=
+      - MAIL_PASSWORD=
+      - MAIL_PORT=1025
+      - MAIL_ENCRYPTION=none
+      - MAIL_FROM_NAME=Matheus Lopes
+      - MAIL_FROM_ADDRESS=matlopes@example.com
+    depends_on:
+      - mailhog
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - 8025:8025

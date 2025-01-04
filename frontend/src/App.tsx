@@ -51,6 +51,35 @@ function App() {
         }}>
           Test Auth
         </button>
+
+        <button onClick={async () => {
+          const payload = {
+            action: 'mail',
+            mail: {
+              from: 'me@example.com',
+              to: 'you@there.com',
+              subject: 'Test mail',
+              message: 'Hello world!'
+            }
+          }
+
+          setPayloads((prev) => [...prev, payload])
+          try {
+            const request = await fetch(`${import.meta.env.VITE_BROKER_HOST}/handle`, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const response = await request.json()
+            setResponses((prev) => [...prev, response])
+          } catch(err) {
+            console.error(err)
+          }
+        }}>
+          Test Mail
+        </button>
       </header>
 
       <section className="container__content">

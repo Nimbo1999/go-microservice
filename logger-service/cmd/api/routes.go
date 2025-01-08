@@ -22,6 +22,5 @@ func (app *Config) routes(allowedOrigins string) http.Handler {
 	mux.Use(middleware.Heartbeat("/ping"))
 	mux.Use(middleware.Logger)
 	mux.Post("/", app.WriteLog)
-	// mux.Post("/handle", app.HandleSubmission)
 	return mux
 }

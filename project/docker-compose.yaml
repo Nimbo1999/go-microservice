@@ -36,6 +36,7 @@ services:
   broker-service:
     depends_on:
       - postgres
+      - rabbitmq
     build:
       context: ../broker-service
       dockerfile: ../broker-service/Dockerfile
@@ -49,6 +50,8 @@ services:
       - ALLOWED_ORIGIN=http://frontend*
       - AUTHENTICATION_SERVICE_BASE_URL=http://authentication-service
       - MAIL_SERVICE_BASE_URL=http://mailer-service
+      - LOG_SERVICE_BASE_URL=http://logger-service
+      - AMQP_URL=amqp://user:password@rabbitmq
 
   authentication-service:
     build:
@@ -146,3 +149,17 @@ services:
       replicas: 1
     volumes:
       - ./db-data/rabbitmq/:/var/lib/rabbitmq/
+
+  listener-service:
+    build:
+      context: ../listener-service
+      dockerfile: ../listener-service/Dockerfile
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      - AMQP_URL=amqp://user:password@rabbitmq
+      - LOG_SERVICE_BASE_URL=http://logger-service
+    depends_on:
+      - rabbitmq

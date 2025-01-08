@@ -54,6 +54,33 @@ function App() {
 
         <button onClick={async () => {
           const payload = {
+            action: 'log',
+            log: {
+              name: 'user',
+	            data: JSON.stringify({name: 'Matheus', email: 'matlopes1999@gmail.com'}),
+            }
+          }
+
+          setPayloads((prev) => [...prev, payload])
+          try {
+            const request = await fetch(`${import.meta.env.VITE_BROKER_HOST}/handle`, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+            const response = await request.json()
+            setResponses((prev) => [...prev, response])
+          } catch(err) {
+            console.error(err)
+          }
+        }}>
+          Test Logger
+        </button>
+
+        <button onClick={async () => {
+          const payload = {
             action: 'mail',
             mail: {
               from: 'me@example.com',

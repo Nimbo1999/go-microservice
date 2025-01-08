@@ -1,6 +1,7 @@
 package main
 
 import (
+	"listener/event"
 	"log"
 	"math"
 	"os"
@@ -15,9 +16,14 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer connection.Close()
-	log.Println("Connected!")
-	time.Sleep(time.Second * 10)
-	log.Println("Disconnecting!")
+
+	consumer, err := event.NewConsumer(connection)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if err := consumer.Listen([]string{"log.DEBUG", "log.INFO", "log.ERROR"}); err != nil {
+		log.Fatalln(err)
+	}
 }
 
 func connect() (*amqp.Connection, error) {
@@ -33,6 +39,7 @@ func connect() (*amqp.Connection, error) {
 			counts++
 		} else {
 			connection = c
+			log.Println("Connected to amqp!")
 			break
 		}
 		if counts > 5 {

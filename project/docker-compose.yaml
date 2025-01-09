@@ -52,6 +52,7 @@ services:
       - MAIL_SERVICE_BASE_URL=http://mailer-service
       - LOG_SERVICE_BASE_URL=http://logger-service
       - AMQP_URL=amqp://user:password@rabbitmq
+      - RPC_URL=logger-service:5001
 
   authentication-service:
     build:

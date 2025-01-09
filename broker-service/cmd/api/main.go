@@ -44,7 +44,7 @@ func connect(env *config.EnvVariables) (*amqp.Connection, error) {
 	var connection *amqp.Connection
 
 	for {
-		c, err := amqp.Dial(env.AMQP_URL)
+		c, err := amqp.Dial(env.AMQPUrl)
 		if err != nil {
 			log.Println("RabbitMQ is not ready yet...")
 			log.Println(err)

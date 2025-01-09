@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/rpc"
 )
 
 type RequestPayload struct {
@@ -57,7 +58,9 @@ func (app *Config) HandleSubmission(response http.ResponseWriter, request *http.
 	case "mail":
 		app.sendMail(response, payload.Mail)
 	case "log":
-		app.logItemViaRabbitMQ(response, payload.Log)
+		app.logItemViaRPC(response, payload.Log)
+		// app.logItem(response, payload.Log)
+		// app.logItemViaRabbitMQ(response, payload.Log)
 	default:
 		app.errorJSON(response, errors.New("unknown action"), http.StatusBadRequest)
 	}
@@ -190,4 +193,25 @@ func (app *Config) pushToQueue(name, message string) error {
 	}
 
 	return emitter.Push(string(j), "log.INFO")
+}
+
+func (app *Config) logItemViaRPC(w http.ResponseWriter, entry LogPayload) {
+	client, err := rpc.Dial("tcp", app.env.RPCUrl)
+	if err != nil {
+		log.Println("[ERROR]:", err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+	defer client.Close()
+
+	var result string
+	if err := client.Call("RPCServer.LogInfo", entry, &result); err != nil {
+		log.Println("[ERROR]:", err)
+		app.errorJSON(w, err, http.StatusInternalServerError)
+		return
+	}
+	var payload jsonResponse
+	payload.Error = false
+	payload.Message = result
+	app.writeJSON(w, http.StatusOK, payload)
 }

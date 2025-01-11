@@ -8,6 +8,7 @@ type EnvVariables struct {
 	LogServiceURL  string
 	AMQPUrl        string
 	RPCUrl         string
+	GRPCUrl        string
 }
 
 func NewEnvVariables() *EnvVariables {
@@ -17,5 +18,6 @@ func NewEnvVariables() *EnvVariables {
 		LogServiceURL:  os.Getenv("LOG_SERVICE_BASE_URL"),
 		AMQPUrl:        os.Getenv("AMQP_URL"),
 		RPCUrl:         os.Getenv("RPC_URL"),
+		GRPCUrl:        os.Getenv("GRPC_URL"),
 	}
 }

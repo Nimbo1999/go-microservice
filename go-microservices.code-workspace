@@ -21,5 +21,8 @@
     {
       "path": "listener-service"
     }
-  ]
+  ],
+  "settings": {
+    "workbench.colorTheme": "Dracula Theme",
+  }
 }

@@ -60,6 +60,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	go app.rpcListen()
+	go app.gRPCListen()
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", webPort),
